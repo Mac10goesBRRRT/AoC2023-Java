@@ -8,11 +8,19 @@ public class Day2 {
     File file;
     Scanner myReader;
 
-    public void setFile(String iFile) {
+    public void solveDay2(){
+        long start2 = System.currentTimeMillis();
+        new Day2().Day2Part1("day2.txt");
+        new Day2().Day2Part2("day2.txt");
+        long end2 = System.currentTimeMillis();
+        System.out.println(", Elapsed Time in milli seconds: " + (end2-start2) + "ms");
+    }
+
+    private void setFile(String iFile) {
         this.file = new File("./input/day2/" + iFile);
     }
 
-    public void Day2Part1(String iFile) {
+    private void Day2Part1(String iFile) {
         {
             Pattern pattern_blue = Pattern.compile("(\\d+) blue");
             Pattern pattern_green = Pattern.compile("(\\d+) green");
@@ -62,7 +70,7 @@ public class Day2 {
                     }
                 }
 
-                System.out.println("Sum: " + sumID);
+                System.out.print("Day 2 Part 1: " + sumID);
                 myReader.close();
             } catch (FileNotFoundException e) {
                 throw new RuntimeException(e);
@@ -71,7 +79,7 @@ public class Day2 {
     }
 
 
-    public void Day2Part2(String iFile) {
+    private void Day2Part2(String iFile) {
         {
             Pattern pattern_blue = Pattern.compile("(\\d+) blue");
             Pattern pattern_green = Pattern.compile("(\\d+) green");
@@ -110,11 +118,11 @@ public class Day2 {
                     }
                     //System.out.println();
                     int powerOfCubes = max_b*max_g*max_r;
-                    System.out.println(powerOfCubes);
+                    //System.out.println(powerOfCubes);
                     sumID += powerOfCubes;
                 }
 
-                System.out.println("Sum: " + sumID);
+                System.out.print(", Day 2 Part 2: " + sumID);
                 myReader.close();
             } catch (FileNotFoundException e) {
                 throw new RuntimeException(e);

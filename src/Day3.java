@@ -14,43 +14,40 @@ public class Day3 {
     int colum;
     int rows;
 
-    public void setFile(String ifile) {
-        this.file = new File("./input/day3/" + ifile);
-        this.path = Path.of("./input/day3/" + ifile);
+    private void setFile(String iFile) {
+        this.file = new File("./input/day3/" + iFile);
+        this.path = Path.of("./input/day3/" + iFile);
     }
 
     public void solveDay3(){
         long start2 = System.currentTimeMillis();
         Day3 d3 = new Day3();
         char[][] c = d3.Day3Input("day3.txt");
-        int rows = d3.rows;
-        int column = d3.colum;
         int[][] lut = d3.makeLutPart1(c);
-        int[][] lut2 = d3.makeLutPart2(c);
         int sum1 = d3.sumNum(c,lut);
-        int sum2 = d3.calculateRatio(c, lut2);
+        int sum2 = d3.calculateRatio(c);
         long end2 = System.currentTimeMillis();
-        System.out.println("Day 3 Part 1: " + sum1 + ", Day 3 Part 1: " + sum2 + ", Elapsed Time in milli seconds: " + (end2-start2) + "ms");
+        System.out.println("Day 3 Part 1: " + sum1 + ", Day 3 Part 2: " + sum2 + ", Elapsed Time in milli seconds: " + (end2-start2) + "ms");
     }
 
-    public char[][] Day3Input(String ifile) {
+    private char[][] Day3Input(String iFile) {
         char[][] c = null;
         try {
-            this.setFile(ifile);
+            this.setFile(iFile);
             myReader = new Scanner(file);
             int lineCount;
             try (Stream<String> stream = Files.lines(path, StandardCharsets.UTF_8)) {
                 lineCount = (int) stream.count() + 2;
             }
             this.colum = lineCount;
-            int streamlen = -1;
+            int streamLen = -1;
             int j = 1;
             while (myReader.hasNextLine()) {
                 String data = myReader.nextLine();
-                if (streamlen == -1) {
-                    streamlen = data.length() + 2;
-                    this.rows = streamlen;
-                    c = new char[lineCount][streamlen];
+                if (streamLen == -1) {
+                    streamLen = data.length() + 2;
+                    this.rows = streamLen;
+                    c = new char[lineCount][streamLen];
                     Arrays.fill(c[0], '.');
                     Arrays.fill(c[lineCount - 1], '.');
                 }
@@ -65,7 +62,7 @@ public class Day3 {
         return c;
     }
 
-    public int[][] makeLutPart1(char[][] input) {
+    private int[][] makeLutPart1(char[][] input) {
         int[][] lut = new int[rows][colum];
         for (int i = 1; i < rows - 1; i++) {
             for (int j = 1; j < colum - 1; j++) {
@@ -76,58 +73,55 @@ public class Day3 {
         return lut;
     }
 
-    public int[][] makeLutPart2(char[][] input) {
-        int[][] lut = new int[rows][colum];
+    private int calculateRatio(char[][] input){
+        int sum = 0;
         for (int i = 1; i < rows - 1; i++) {
             for (int j = 1; j < colum - 1; j++) {
                 if (input[i][j] == '*')
-                    lut[i][j] = checkAdjGears(input, i, j);
-            }
-        }
-        return lut;
-    }
-
-    private int checkAdjGears(char[][] input, int i, int j) {
-        //Compass is possible, but just produces tons of code
-        int num = 0;
-        if (numCheck(input[i][j - 1])) num++;
-        if (numCheck(input[i][j + 1])) num++;
-        if (numCheck(input[i - 1][j])) num++;
-        else {
-            if (numCheck(input[i - 1][j - 1])) num++;
-            if (numCheck(input[i - 1][j + 1])) num++;
-        }
-        if (numCheck(input[i + 1][j])) num++;
-        else {
-            if (numCheck(input[i + 1][j - 1])) num++;
-            if (numCheck(input[i + 1][j + 1])) num++;
-        }
-        return num;
-    }
-
-    public int calculateRatio(char[][] input, int[][] lut) {
-        int sum = 0;
-        for (int i = 1; i < rows - 1; i++) {
-            for (int j = 1; j < rows - 1; j++) {
-                if (lut[i][j] == 2) {
-                    int prod = 1;
-                    if (numCheck(input[i][j - 1])) prod *= findNum(input[i], j - 1);
-                    if (numCheck(input[i][j + 1])) prod *= findNum(input[i], j + 1);
-                    if (numCheck(input[i - 1][j])) prod *= findNum(input[i - 1], j);
-                    else {
-                        if (numCheck(input[i - 1][j - 1])) prod *= findNum(input[i - 1], j - 1);
-                        if (numCheck(input[i - 1][j + 1])) prod *= findNum(input[i - 1], j + 1);
-                    }
-                    if (numCheck(input[i + 1][j])) prod *= findNum(input[i + 1], j);
-                    else {
-                        if (numCheck(input[i + 1][j - 1])) prod *= findNum(input[i + 1], j - 1);
-                        if (numCheck(input[i + 1][j + 1])) prod *= findNum(input[i + 1], j + 1);
-                    }
-                    sum += prod;
-                }
+                    sum += checkAdjAndCalcGears(input, i, j);
             }
         }
         return sum;
+    }
+
+    private int checkAdjAndCalcGears(char[][] input, int i, int j) {
+        int num = 0;
+        int prod = 1;
+        if (numCheck(input[i][j - 1])) {
+            num++;
+            prod *= findNum(input[i], j - 1);
+        }
+        if (numCheck(input[i][j + 1])) {
+            prod *= findNum(input[i], j + 1);
+            num++;
+        }
+        if (numCheck(input[i - 1][j])) {
+            prod *= findNum(input[i - 1], j);
+            num++;
+        } else {
+            if (numCheck(input[i - 1][j - 1])) {
+                prod *= findNum(input[i - 1], j - 1);
+                num++;
+            }
+            if (numCheck(input[i - 1][j + 1])) {
+                prod *= findNum(input[i - 1], j + 1);
+                num++;
+            }
+        }
+        if (numCheck(input[i + 1][j])) {
+            prod *= findNum(input[i + 1], j);
+            num++;
+        } else {
+            if (numCheck(input[i + 1][j - 1])) {
+                prod *= findNum(input[i + 1], j - 1);
+                num++;
+            }
+            if (numCheck(input[i + 1][j + 1])) {
+                prod *= findNum(input[i + 1], j + 1);
+                num++;
+            }
+        }
+        return (num==2)? prod : 0;
     }
 
     private int findNum(char[] input, int index) {
@@ -140,8 +134,7 @@ public class Day3 {
         while (numCheck(input[firstIndex - 1]))
             firstIndex--;
         String str = new String(input);
-        int value = Integer.parseInt(str.substring(firstIndex, lastIndex + 1));
-        return value;
+        return Integer.parseInt(str.substring(firstIndex, lastIndex + 1));
     }
 
 
@@ -149,7 +142,7 @@ public class Day3 {
         return input >= '0' && input <= '9';
     }
 
-    public int sumNum(char[][] input, int[][] lut) {
+    private int sumNum(char[][] input, int[][] lut) {
         int num = 0;
         for (int i = 1; i < rows; i++) {
             for (int j = 1; j < colum - 1; j++) {
