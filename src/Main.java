@@ -3,6 +3,7 @@ public class Main {
         //new Day1().solveDay1();
         //new Day2().solveDay2();
         //new Day3().solveDay3();
-        new Day4().solveDay4();
+        //new Day4().solveDay4();
+        new Day5().solveDay5();
     }
 }

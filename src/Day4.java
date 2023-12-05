@@ -1,6 +1,5 @@
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.sql.SQLOutput;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -14,8 +13,8 @@ public class Day4 {
         this.file = new File("./input/day4/" + iFile);
     }
     public void solveDay4() {
-        long start2 = System.currentTimeMillis();
         setFile("day4.txt");
+        long start2 = System.currentTimeMillis();
         inputObj iObj = Day4Input("day4.txt");
         int sum1 = Part1(iObj);
         int sum2 = Part2(iObj);
