@@ -1,24 +1,26 @@
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
 public class Day5 {
     //dest start, source start, length
     //Everything not mapped stays the same
-    //long[] seed = new long[]{28965817L,302170009L,1752849261L,48290258L,804904201L,243492043L,2150339939L,385349830L,1267802202L,350474859L,2566296746L,17565716L,3543571814L,291402104L,447111316L,279196488L,3227221259L,47952959L,1828835733L,9607836L};
-    long[] seed = {79,14,55,13};
     List<long[]> map;
     public void solveDay5() {
-        map = inputReader();
+        map = inputReader("sampleInput.txt");
         int h= 5*5;
     }
 
-    private List<long[]> inputReader(){
+    /**
+     * Reads the Day 5 Input
+     * @param filename filename in folder
+     * @return ArrayList of the File, [0] is the cut of points for maps, [1] is the seeds. Rest is input-dependant
+     */
+    private List<long[]> inputReader(String filename){
         List<long[]> map = new ArrayList<>();
-        File file = new File("./input/day5/sampleInput.txt");
+        File file = new File("./input/day5/" + filename);
         map.add(new long[7]);
         try {
         Scanner myReader = new Scanner(file);
