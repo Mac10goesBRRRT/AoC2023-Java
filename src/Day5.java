@@ -10,35 +10,39 @@ public class Day5 {
     //Everything not mapped stays the same
     List<long[]> map;
     public void solveDay5() {
+        System.out.print("!!!---Consider Commenting this out, it may take a while! ");
+        long start2 = System.currentTimeMillis();
         boolean solved = false;
         map = inputReader("day5.txt");
-        //map = listSorter(map,0);
         long[] border = map.get(0);
         border[0] += 2;
         for(int i = 1; i < border.length; i++)
             border[i] = border[i] + border[i-1];
-        System.out.println(Arrays.toString(border));
         long[] seed = map.get(1);
-        System.out.println("locating seeds: " + Arrays.toString(seed));
         map = listSorter(map,1);
-        part1Solve(map);
+        long part1 = part1Solve(map, 0, 0);
+        System.out.print("Day 5 Part 1: " + part1);
+        //Preparation for part 2
         long lastSeed = 0;
         long lastLoc = 0;
-        /*
+        //Preparing Range:
+        long[] SeedRange = map.get(1);
+        for(int i = 1; i < SeedRange.length; i+=2){
+            SeedRange[i] += SeedRange[i-1] - 1;
+        }
         map = listSorter(map,0);
-        for(long currentLoc = 1; currentLoc<=100;){ //3543571814L
+        for(long currentLoc = 0;  currentLoc<=3543571814L;){ //3543571814L
             long[] ranges = new long[7];
             long reverseSeed = rangeLogic(currentLoc, (int) border[5], (int) border[6], map, ranges, 0);
             for(int i = 5; i > 0; i--){
-                reverseSeed = rangeLogic(reverseSeed, (int) border[i-1], (int) border[i], map, ranges, 1);
+                reverseSeed = rangeLogic(reverseSeed, (int) border[i-1], (int) border[i], map, ranges, 5-i);
             }
             reverseSeed = rangeLogic(reverseSeed, 2, (int) border[0], map, ranges, 6);
-            System.out.println("For location: " + currentLoc + ", seed: " + reverseSeed);
             Arrays.sort(ranges);
             if(reverseSeed == -1) {
-                System.out.println("For location: " + currentLoc + ", seed: " + reverseSeed);
                 break;
             }
+            //find the shortest current range
             int k = 0;
             while(ranges[k]==0) {
                 k++;
@@ -48,23 +52,19 @@ public class Day5 {
                     break;
                 }
             }
-            for(long s : seed){
-                //logik anpassen, der seed muss zwischen dem Letzen seed und der jetzigen starting loc sein
-                long upperRangeLimit = currentLoc - 1;
-                if(lastSeed != 0 && lastSeed <= s && reverseSeed >= s){
-                    System.out.println("Found location between " + lastLoc + " and " + upperRangeLimit + " seed " + s);
-                    solved = true;
+            //if we have the shortest ranges, we can calculate if the seed range was hit
+            for(int i = 1; i < SeedRange.length; i+=2){
+                if((reverseSeed >= SeedRange[i-1] && reverseSeed <= SeedRange[i]) || (reverseSeed + ranges[k] >= SeedRange[i-1] && reverseSeed + ranges[k] <= SeedRange[i])){
+                    map = listSorter(map,1);
+                    long part2 = part1Solve(map, SeedRange[i-1], SeedRange[i]);
+                    long end2 = System.currentTimeMillis();
+                    System.out.println(", Day 5 Part 2: " + part2 + ", Elapsed Time in milli seconds: " + (end2-start2) + "ms");
+                    return;
                 }
             }
-            //if(solved)
-            //    break;
-            lastLoc = currentLoc;
             currentLoc += ranges[k];
-            //currentLoc++;
-            lastSeed = reverseSeed;
-
         }
-         */
+
     }
 
     /**
@@ -140,7 +140,6 @@ public class Day5 {
         int fromIndex = 2;
         for(int i = 0; i < key.length; i++){
             toIndex = (int)key[i];
-            //System.out.println("Sort from: " + fromIndex + " to: " + toIndex);
             List<long[]> sublist = map.subList(fromIndex, toIndex);
             sublist.sort(Comparator.comparingLong(arr -> arr[index]));
             for(int j = fromIndex, k = 0; j < toIndex; j++,k++){
@@ -153,10 +152,14 @@ public class Day5 {
 
     private long rangeLogic(long input, int rangeFrom, int rangeTo, List<long[]> map, long[] ranges, int rangePos){
         List<long[]> sublist = map.subList(rangeFrom, rangeTo);
-        if(input < sublist.get(0)[0])
+        if(input < sublist.get(0)[0]) {
+            ranges[rangePos] = sublist.get(0)[0] - input;
             return input;
-        if(input > sublist.get(rangeTo-rangeFrom-1)[0]+sublist.get(rangeTo-rangeFrom-1)[2] - 1)
+        }
+        if(input > sublist.get(rangeTo-rangeFrom-1)[0]+sublist.get(rangeTo-rangeFrom-1)[2] - 1) {
+            ranges[rangePos] = Long.MAX_VALUE;
             return input;
+        }
         for(int i = 0;i<sublist.size();i++){
             long[] listEntry = sublist.get(i);
             if(listEntry[0] <= input && listEntry[0]+listEntry[2]-1 >= input){
@@ -180,25 +183,31 @@ public class Day5 {
         }
         return input;
     }
-    private long part1Solve(List<long[]> map){
+    private long part1Solve(List<long[]> map, long start, long fin){
         long[] border = map.get(0);
         long[] seed = map.get(1);
         long lowLoc = Long.MAX_VALUE;
         long lowSeed = Long.MAX_VALUE;
-        for(long s : seed){
-            long currseed = s;
+        boolean arrMode = false;
+        long currseed;
+        if(start == fin && start == 0){
+            arrMode = true;
+            fin = seed.length;
+        }
+        for(long s = start; s < fin; s++){
+            if(arrMode)
+                currseed = seed[(int) s];
+            else
+                currseed = s;
             for(int i = 0; i < 7; i++){
                 if(i-1 == -1)
                     currseed = forwardRangeLogic(currseed, 2, (int) border[i], map);
                 else
                     currseed = forwardRangeLogic(currseed, (int) border[i-1], (int) border[i], map);
-                //System.out.println("Seed " + s + " Range Max: " + border[i] + " Result: " + currseed);
             }
-            //System.out.println("For seed: " + s + " Location: " + currseed);
             lowSeed = (currseed<lowLoc)? s : lowSeed;
             lowLoc = Math.min(currseed, lowLoc);
-            System.out.println("Current lowest seed: " + lowSeed + " with location: " + lowLoc);
         }
-        return lowSeed;
+        return lowLoc;
     }
 }
