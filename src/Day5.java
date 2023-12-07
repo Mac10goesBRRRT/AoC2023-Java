@@ -2,6 +2,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 
 import java.math.MathContext;
+import java.sql.SQLOutput;
 import java.util.*;
 
 public class Day5 {
@@ -10,8 +11,8 @@ public class Day5 {
     List<long[]> map;
     public void solveDay5() {
         boolean solved = false;
-        map = inputReader("sampleInput.txt");
-        map = listSorter(map);
+        map = inputReader("day5.txt");
+        //map = listSorter(map,0);
         long[] border = map.get(0);
         border[0] += 2;
         for(int i = 1; i < border.length; i++)
@@ -19,16 +20,18 @@ public class Day5 {
         System.out.println(Arrays.toString(border));
         long[] seed = map.get(1);
         System.out.println("locating seeds: " + Arrays.toString(seed));
+        map = listSorter(map,1);
+        part1Solve(map);
         long lastSeed = 0;
         long lastLoc = 0;
+        /*
+        map = listSorter(map,0);
         for(long currentLoc = 1; currentLoc<=100;){ //3543571814L
             long[] ranges = new long[7];
             long reverseSeed = rangeLogic(currentLoc, (int) border[5], (int) border[6], map, ranges, 0);
-            reverseSeed = rangeLogic(reverseSeed, (int) border[4], (int) border[5], map, ranges, 1);
-            reverseSeed = rangeLogic(reverseSeed, (int) border[3], (int) border[4], map, ranges, 2);
-            reverseSeed = rangeLogic(reverseSeed, (int) border[2], (int) border[3], map, ranges, 3);
-            reverseSeed = rangeLogic(reverseSeed, (int) border[1], (int) border[2], map, ranges, 4);
-            reverseSeed = rangeLogic(reverseSeed, (int) border[0], (int) border[1], map, ranges, 5);
+            for(int i = 5; i > 0; i--){
+                reverseSeed = rangeLogic(reverseSeed, (int) border[i-1], (int) border[i], map, ranges, 1);
+            }
             reverseSeed = rangeLogic(reverseSeed, 2, (int) border[0], map, ranges, 6);
             System.out.println("For location: " + currentLoc + ", seed: " + reverseSeed);
             Arrays.sort(ranges);
@@ -59,7 +62,9 @@ public class Day5 {
             currentLoc += ranges[k];
             //currentLoc++;
             lastSeed = reverseSeed;
+
         }
+         */
     }
 
     /**
@@ -129,15 +134,15 @@ public class Day5 {
         return map;
     }
 
-    private List<long[]> listSorter(List<long[]> map){
+    private List<long[]> listSorter(List<long[]> map, int index){
         long[] key = map.get(0);
         int toIndex = 2;
         int fromIndex = 2;
         for(int i = 0; i < key.length; i++){
-            toIndex += (int)key[i];
+            toIndex = (int)key[i];
             //System.out.println("Sort from: " + fromIndex + " to: " + toIndex);
             List<long[]> sublist = map.subList(fromIndex, toIndex);
-            sublist.sort(Comparator.comparingLong(arr -> arr[0]));
+            sublist.sort(Comparator.comparingLong(arr -> arr[index]));
             for(int j = fromIndex, k = 0; j < toIndex; j++,k++){
                 map.set(j, sublist.get(k));
             }
@@ -160,5 +165,40 @@ public class Day5 {
             }
         }
         return input; //if not in any list, it should stay the same
+    }
+    private long forwardRangeLogic(long input, int rangeFrom, int rangeTo, List<long[]> map){
+        List<long[]> sublist = map.subList(rangeFrom, rangeTo);
+        if(input < sublist.get(0)[1])
+            return input;
+        if(input > sublist.get(rangeTo-rangeFrom-1)[1]+sublist.get(rangeTo-rangeFrom-1)[2] - 1)
+            return input;
+        for(int i = 0;i<sublist.size();i++){
+            long[] listEntry = sublist.get(i);
+            if(listEntry[1] <= input && listEntry[1]+listEntry[2]-1 >= input){
+                return (input - listEntry[1]) + listEntry[0];
+            }
+        }
+        return input;
+    }
+    private long part1Solve(List<long[]> map){
+        long[] border = map.get(0);
+        long[] seed = map.get(1);
+        long lowLoc = Long.MAX_VALUE;
+        long lowSeed = Long.MAX_VALUE;
+        for(long s : seed){
+            long currseed = s;
+            for(int i = 0; i < 7; i++){
+                if(i-1 == -1)
+                    currseed = forwardRangeLogic(currseed, 2, (int) border[i], map);
+                else
+                    currseed = forwardRangeLogic(currseed, (int) border[i-1], (int) border[i], map);
+                //System.out.println("Seed " + s + " Range Max: " + border[i] + " Result: " + currseed);
+            }
+            //System.out.println("For seed: " + s + " Location: " + currseed);
+            lowSeed = (currseed<lowLoc)? s : lowSeed;
+            lowLoc = Math.min(currseed, lowLoc);
+            System.out.println("Current lowest seed: " + lowSeed + " with location: " + lowLoc);
+        }
+        return lowSeed;
     }
 }
