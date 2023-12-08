@@ -24,9 +24,11 @@ public class Day8 {
         }
         System.out.println(nodeCounts);
         long lcm = nodeCounts.get(0);
+        /*
         for(int i = 1; i < nodeCounts.size(); i++){
             lcm = lcm(lcm, nodeCounts.get(i));
-        }
+        }*/
+
         return lcm;
     }
 
