@@ -32,37 +32,43 @@ public class Day5 {
         }
         map = listSorter(map,0);
         for(long currentLoc = 0;  currentLoc<=3543571814L;){ //3543571814L
-            long[] ranges = new long[7];
-            long reverseSeed = rangeLogic(currentLoc, (int) border[5], (int) border[6], map, ranges, 0);
+            long[] lowerRange = new long[7];
+            long[] upperRange = new long[7];
+            long reverseSeed = rangeLogic(currentLoc, (int) border[5], (int) border[6], map, lowerRange, upperRange, 0);
             for(int i = 5; i > 0; i--){
-                reverseSeed = rangeLogic(reverseSeed, (int) border[i-1], (int) border[i], map, ranges, 5-i);
+                reverseSeed = rangeLogic(reverseSeed, (int) border[i-1], (int) border[i], map, lowerRange, upperRange, 5-i);
             }
-            reverseSeed = rangeLogic(reverseSeed, 2, (int) border[0], map, ranges, 6);
-            Arrays.sort(ranges);
+            reverseSeed = rangeLogic(reverseSeed, 2, (int) border[0], map, lowerRange, upperRange, 6);
+            Arrays.sort(lowerRange);
+            Arrays.sort(upperRange);
             if(reverseSeed == -1) {
                 break;
             }
             //find the shortest current range
-            int k = 0;
-            while(ranges[k]==0) {
-                k++;
-                if(k==7){
-                    k=0;
+            int lowerRangeIndex = 0;
+            while(lowerRange[lowerRangeIndex]==0 && lowerRangeIndex < lowerRange.length)
+                lowerRangeIndex++;
+            int upperRangeIndex = 0;
+            while(upperRange[upperRangeIndex]==0) {
+                upperRangeIndex++;
+                if(upperRangeIndex==7){
+                    upperRangeIndex=0;
                     currentLoc++;
                     break;
                 }
             }
             //if we have the shortest ranges, we can calculate if the seed range was hit
             for(int i = 1; i < SeedRange.length; i+=2){
-                if((reverseSeed >= SeedRange[i-1] && reverseSeed <= SeedRange[i]) || (reverseSeed + ranges[k] >= SeedRange[i-1] && reverseSeed + ranges[k] <= SeedRange[i])){
+                if((reverseSeed >= SeedRange[i-1] && reverseSeed <= SeedRange[i]) || (reverseSeed + upperRange[upperRangeIndex] >= SeedRange[i-1] && reverseSeed + upperRange[upperRangeIndex] <= SeedRange[i])){
                     map = listSorter(map,1);
+                    System.out.println("possible seed: " + reverseSeed + " @loc: " + currentLoc + " minimum: " + (currentLoc-lowerRange[lowerRangeIndex]) + " maximum: " + (currentLoc + upperRange[upperRangeIndex]));
                     long part2 = part1Solve(map, SeedRange[i-1], SeedRange[i]);
                     long end2 = System.currentTimeMillis();
                     System.out.println(", Day 5 Part 2: " + part2 + ", Elapsed Time in milli seconds: " + (end2-start2) + "ms");
                     return;
                 }
             }
-            currentLoc += ranges[k];
+            currentLoc += upperRange[upperRangeIndex];
         }
 
     }
@@ -150,20 +156,23 @@ public class Day5 {
         return map;
     }
 
-    private long rangeLogic(long input, int rangeFrom, int rangeTo, List<long[]> map, long[] ranges, int rangePos){
+    private long rangeLogic(long input, int rangeFrom, int rangeTo, List<long[]> map, long[] lowerRange,long[] upperRange, int rangePos){
         List<long[]> sublist = map.subList(rangeFrom, rangeTo);
         if(input < sublist.get(0)[0]) {
-            ranges[rangePos] = sublist.get(0)[0] - input;
+            lowerRange[rangePos] = input;
+            upperRange[rangePos] = sublist.get(0)[0] - input;
             return input;
         }
         if(input > sublist.get(rangeTo-rangeFrom-1)[0]+sublist.get(rangeTo-rangeFrom-1)[2] - 1) {
-            ranges[rangePos] = Long.MAX_VALUE;
+            lowerRange[rangePos] = sublist.get(rangeTo-rangeFrom-1)[1]+sublist.get(rangeTo-rangeFrom-1)[2]; // may be 1 or 2
+            upperRange[rangePos] = Long.MAX_VALUE;
             return input;
         }
         for(int i = 0;i<sublist.size();i++){
             long[] listEntry = sublist.get(i);
             if(listEntry[0] <= input && listEntry[0]+listEntry[2]-1 >= input){
-                ranges[rangePos] = listEntry[2] - (input - listEntry[0]);
+                lowerRange[rangePos] = input - listEntry[0];
+                upperRange[rangePos] = listEntry[2] - (input - listEntry[0]);
                 return input - listEntry[0] + listEntry[1];
             }
         }
