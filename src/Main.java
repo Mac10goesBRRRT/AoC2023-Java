@@ -8,6 +8,7 @@ public class Main {
         //new Day6().solveDay6();
         //new Day7().solveDay7();
         //new Day8().solveDay8();
-        new Day9().solveDay9();
+        //new Day9().solveDay9();
+        new Day10().solveDay10();
     }
 }
