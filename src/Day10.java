@@ -14,12 +14,14 @@ public class Day10 {
     public static final String ANSI_RED = "\u001B[31m";
     public static final String ANSI_BLUE = "\u001B[34m";
 
+    char startPipe = '╗';
+
     int colums, rows;
     int xStart, yStart;
     private char[][] getInput() {
         char[][] c = new char[0][];
         try {
-            Path path = Path.of("./input/day10/sampleInput.txt");
+            Path path = Path.of("./input/day10/day10.txt");
             Scanner myReader = new Scanner(path);
             int lineCount;
             try (Stream<String> stream = Files.lines(path, StandardCharsets.UTF_8)) {
@@ -36,7 +38,7 @@ public class Day10 {
                     this.rows = streamLen;
                     c = new char[lineCount][streamLen];
                 }
-                data = data.replaceAll("\\.", " ")
+                data = data.replaceAll("\\.", ".")
                         .replaceAll("\\|", "║")
                         .replaceAll("-", "═")
                         .replaceAll("L", "╚")
@@ -67,7 +69,12 @@ public class Day10 {
         for(int[] l : lut)
             Arrays.fill(l,-1);
         loopStart(map, lut);
-        System.out.println("done");
+        double sum1 = lookUp(lut);
+        char[][]big = supersizeArray(map,lut);
+        //printCharArray(big);
+        floodFill(big);
+        //printCharArray(big);
+        shrinkArray(big, lut);/*
         for(int i = 0; i < map.length; i++) {
             for (int j = 0; j < map[i].length; j++) {
                 if (lut[i][j] > -1) {
@@ -75,13 +82,38 @@ public class Day10 {
                         System.out.print(ANSI_RED + map[i][j] + ANSI_RESET);
                     else
                         System.out.print(ANSI_GREEN + map[i][j] + ANSI_RESET);
-                }else
-                    System.out.print(map[i][j]);
+                }else {
+                    if(lut[i][j]==-2)
+                        System.out.print(ANSI_BLUE + map[i][j] + ANSI_RESET);
+                    else
+                        System.out.print(map[i][j]);
+                }
+            }
+            System.out.println();
+        }*/
+        System.out.println(Math.ceil(sum1/2));
+        System.out.println(countMinus1(lut));
+    }
+
+    private void shrinkArray(char[][] big, int[][] lut) {
+        for(int y = 0; y < lut.length; y++){
+            for(int x = 0; x < lut[0].length; x++){
+                if(big[y*3+1][x*3+1]=='o')
+                    lut[y][x] = -2;
+            }
+        }
+    }
+
+    private static void printCharArray(char[][] big) {
+        for(char[] c : big){
+            for(char d : c){
+                if(d=='x')
+                    System.out.print(ANSI_RED + d + ANSI_RESET);
+                else
+                    System.out.print(d);
             }
             System.out.println();
         }
-        double sum1 = lookUp(lut);
-        System.out.println(Math.ceil(sum1/2));
     }
 
     private int lookUp(int[][] lut) {
@@ -100,50 +132,6 @@ public class Day10 {
     private void loopStart(char[][]map, int[][]lut){
         lut[yStart][xStart] = 0;
         depthFirstSearch(map,lut,yStart,xStart);
-    }
-
-    private void pathfindW(char[][] map, int[][] lut, int y, int x, int i) {
-        lut[y][x] = i;
-        if(map[y][x] == '═' && lut[y][x+1]== -1)
-            pathfindW(map, lut, y, x+1, i+1);
-        else if(map[y][x] == '╗' && lut[y+1][x]== -1)
-            pathfindN(map, lut, y+1, x, i+1);
-        else if(map[y][x] == '╝' && lut[y-1][x]== -1)
-            pathfindS(map, lut, y-1, x, i+1);
-        else return;
-    }
-
-    private void pathfindE(char[][] map, int[][] lut, int y, int x, int i) {
-        lut[y][x] = i;
-        if(map[y][x] == '═' && lut[y][x-1]== -1)
-            pathfindE(map, lut, y, x-1, i+1);
-        else if(map[y][x] == '╔' && lut[y+1][x]== -1)
-            pathfindN(map, lut, y+1, x, i+1);
-        else if(map[y][x] == '╚' && lut[y-1][x]== -1)
-            pathfindS(map, lut, y-1, x, i+1);
-        else return;
-    }
-
-    private void pathfindN(char[][] map, int[][] lut, int y, int x, int i) {
-        lut[y][x] = i;
-        if(map[y][x] == '║' && lut[y+1][x]== -1)
-            pathfindN(map, lut, y+1, x, i+1);
-        else if(map[y][x] == '╝' && lut[y][x-1]== -1)
-            pathfindE(map, lut, y, x-1, i+1);
-        else if(map[y][x] == '╚' && lut[y][x+1]== -1)
-            pathfindW(map, lut, y, x+1, i+1);
-        else return;
-    }
-
-    private void pathfindS(char[][] map, int[][] lut, int y, int x, int i) {
-        lut[y][x] = i;
-        if(map[y][x] == '║' && lut[y-1][x] == -1)
-            pathfindS(map, lut, y-1, x, i+1);
-        else if(map[y][x] == '╗' && lut[y][x-1] == -1)
-            pathfindE(map, lut, y, x-1, i+1);
-        else if(map[y][x] == '╔' && lut[y][x+1] == -1)
-            pathfindW(map, lut, y, x+1, 1+1);
-        else return;
     }
 
     private void depthFirstSearch(char[][] map, int[][] lut, int startY, int startX){
@@ -189,5 +177,79 @@ public class Day10 {
                     stack.push(new int[]{y, x+1, i+1});
             }
         }
+    }
+    private void floodFill(char[][] big){
+        Deque<int[]> stack = new ArrayDeque<>();
+        stack.push(new int[]{0,0});
+        big[0][0] = 'o';
+        while(!stack.isEmpty()){
+            int[] current = stack.pop();
+            int y = current[0];
+            int x = current[1];
+            big[y][x] = 'o';
+            if(y-1 > -1 && big[y-1][x] == 'i')
+                stack.push(new int[]{y-1,x});
+            if(y+1 < big.length && big[y+1][x] == 'i')
+                stack.push(new int[]{y+1,x});
+            if(x-1 > -1 && big[y][x-1] == 'i')
+                stack.push(new int[]{y,x-1});
+            if(x+1 < big[0].length && big[y][x+1] == 'i')
+                stack.push(new int[]{y,x+1});
+        }
+    }
+    private int countMinus1(int[][]lut){
+        int count = 0;
+        for(int[] l : lut){
+            for(int i : l){
+                if(i == -1)
+                    count++;
+            }
+        }
+        return count;
+    }
+
+    private char[][] supersizeArray(char[][] map, int[][] lut){
+        char[][] big = new char[lut.length*3][lut[0].length*3];
+        for(char[] c : big){
+            Arrays.fill(c,'i');
+        }
+        for(int y = 0; y < lut.length; y++){
+            for(int x = 0; x <lut[0].length; x++){
+                if(lut[y][x]!=-1){
+                    //now we fill
+                    char c = map[y][x];
+                    if(c == 'S')
+                        c=startPipe;
+                    switch (c) {
+                        case '║':   big[y*3][x*3] = 'i';big[y*3][x*3+1] = 'x';big[y*3][x*3+2] = 'i';
+                                    big[y*3+1][x*3] = 'i';big[y*3+1][x*3+1] = 'x';big[y*3+1][x*3+2] = 'i';
+                                    big[y*3+2][x*3] = 'i';big[y*3+2][x*3+1] = 'x';big[y*3+2][x*3+2] = 'i';
+                                    break;
+                        case '═':   big[y*3][x*3] = 'i';big[y*3][x*3+1] = 'i';big[y*3][x*3+2] = 'i';
+                                    big[y*3+1][x*3] = 'x';big[y*3+1][x*3+1] = 'x';big[y*3+1][x*3+2] = 'x';
+                                    big[y*3+2][x*3] = 'i';big[y*3+2][x*3+1] = 'i';big[y*3+2][x*3+2] = 'i';
+                                    break;
+                        case '╚':   big[y*3][x*3] = 'i';big[y*3][x*3+1] = 'x';big[y*3][x*3+2] = 'i';
+                                    big[y*3+1][x*3] = 'i';big[y*3+1][x*3+1] = 'x';big[y*3+1][x*3+2] = 'x';
+                                    big[y*3+2][x*3] = 'i';big[y*3+2][x*3+1] = 'i';big[y*3+2][x*3+2] = 'i';
+                                    break;
+                        case '╝':   big[y*3][x*3] = 'i';big[y*3][x*3+1] = 'x';big[y*3][x*3+2] = 'i';
+                                    big[y*3+1][x*3] = 'x';big[y*3+1][x*3+1] = 'x';big[y*3+1][x*3+2] = 'i';
+                                    big[y*3+2][x*3] = 'i';big[y*3+2][x*3+1] = 'i';big[y*3+2][x*3+2] = 'i';
+                                    break;
+                        case '╗':   big[y*3][x*3] = 'i';big[y*3][x*3+1] = 'i';big[y*3][x*3+2] = 'i';
+                                    big[y*3+1][x*3] = 'x';big[y*3+1][x*3+1] = 'x';big[y*3+1][x*3+2] = 'i';
+                                    big[y*3+2][x*3] = 'i';big[y*3+2][x*3+1] = 'x';big[y*3+2][x*3+2] = 'i';
+                                    break;
+                        case '╔':   big[y*3][x*3] = 'i';big[y*3][x*3+1] = 'i';big[y*3][x*3+2] = 'i';
+                                    big[y*3+1][x*3] = 'i';big[y*3+1][x*3+1] = 'x';big[y*3+1][x*3+2] = 'x';
+                                    big[y*3+2][x*3] = 'i';big[y*3+2][x*3+1] = 'x';big[y*3+2][x*3+2] = 'i';
+                                    break;
+                    }
+                }
+            }
+        }
+
+        return big;
     }
 }
