@@ -63,6 +63,7 @@ public class Day10 {
     }
 
     public void solveDay10() {
+        long start = System.currentTimeMillis();
         char[][] map = getInput();
         //Create and fill lut
         int[][] lut = new int[colums][rows];
@@ -91,8 +92,10 @@ public class Day10 {
             }
             System.out.println();
         }*/
-        System.out.println(Math.ceil(sum1/2));
-        System.out.println(countMinus1(lut));
+        sum1 = Math.ceil(sum1/2);
+        int sum2 = countMinus1(lut);
+        long end = System.currentTimeMillis();
+        System.out.println("Day 10 Part 1: " + sum1 + ", Day 10 Part 2: " + sum2 + ", Elapsed Time: " + (end-start) + "ms");
     }
 
     private void shrinkArray(char[][] big, int[][] lut) {

@@ -14,7 +14,7 @@ public class Day8 {
         int sum1 = solveSingleMaze("AAA");
         long sum2 = solveMultiMaze();
         long end2 = System.currentTimeMillis();
-        System.out.println("Day 4 Part 1: " + sum1 + ", Day 4 Part 2: " + sum2 + ", Elapsed Time in milli seconds: " + (end2-start2) + "ms");
+        System.out.println("Day 8 Part 1: " + sum1 + ", Day 8 Part 2: " + sum2 + ", Elapsed Time in milli seconds: " + (end2-start2) + "ms");
     }
 
     private long solveMultiMaze(){
