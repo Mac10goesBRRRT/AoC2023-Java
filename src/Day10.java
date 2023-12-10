@@ -86,10 +86,14 @@ public class Day10 {
 
     private int lookUp(int[][] lut) {
         int res = -1;
-        res = Math.max(lut[yStart - 1][xStart], res);
-        res = Math.max(lut[yStart + 1][xStart], res);
-        res = Math.max(lut[yStart][xStart - 1], res);
-        res = Math.max(lut[yStart][xStart + 1], res);
+        if(yStart-1 > -1)
+            res = Math.max(lut[yStart - 1][xStart], res);
+        if(yStart+1 < lut[0].length)
+            res = Math.max(lut[yStart + 1][xStart], res);
+        if(xStart-1 > -1)
+            res = Math.max(lut[yStart][xStart - 1], res);
+        if(xStart+1 < lut[0].length)
+            res = Math.max(lut[yStart][xStart + 1], res);
         return res;
     }
 
@@ -148,13 +152,13 @@ public class Day10 {
         if((yStart-1) >-1 && (map[yStart-1][xStart]=='║'||map[yStart-1][xStart]=='╗'||map[yStart-1][xStart]=='╔')) {
             stack.push(new int[]{yStart-1, xStart, 1});
         }
-        else if(map[yStart+1][xStart]=='║'||map[yStart+1][xStart]=='╝'||map[yStart+1][xStart]=='╚') {
+        else if((yStart+1) < map[0].length &&(map[yStart+1][xStart]=='║'||map[yStart+1][xStart]=='╝'||map[yStart+1][xStart]=='╚')) {
             stack.push(new int[]{yStart+1, xStart, 1});
         }
-        else if(map[yStart][xStart-1]=='═'||map[yStart][xStart-1]=='╔'||map[yStart][xStart-1]=='╚') {
+        else if((xStart-1) >-1 && (map[yStart][xStart-1]=='═'||map[yStart][xStart-1]=='╔'||map[yStart][xStart-1]=='╚')) {
             stack.push(new int[]{yStart, xStart-1, 1});
         }
-        else if(map[yStart][xStart+1]=='═'||map[yStart][xStart+1]=='╗'||map[yStart][xStart+1]=='╝') {
+        else if((xStart +1) < map[0].length && (map[yStart][xStart+1]=='═'||map[yStart][xStart+1]=='╗'||map[yStart][xStart+1]=='╝')) {
             stack.push(new int[]{yStart, xStart+1, 1});
         }
         //here comes the overflow
@@ -169,7 +173,7 @@ public class Day10 {
             //System.out.println("Currently@: " + c + " lut: " + lut[y][x]);
             //need to look at where we currently are
             if(map[y][x]=='║'||map[y][x]=='╝'||map[y][x]=='╚') {
-                if((map[y-1][x] == '║' || map[y-1][x] == '╗' || map[y-1][x] == '╔') && lut[y-1][x] == -1)
+                if((y-1) >-1 && ((map[y-1][x] == '║' || map[y-1][x] == '╗' || map[y-1][x] == '╔')) && lut[y-1][x] == -1)
                     stack.push(new int[]{y-1, x, i+1});
             }
             if(map[y][x]=='║'|| map[y][x]=='╗'|| map[y][x]=='╔') {
@@ -177,7 +181,7 @@ public class Day10 {
                     stack.push(new int[]{y+1, x, i+1});
             }
             if(map[y][x]=='═'||map[y][x]=='╗'||map[y][x]=='╝') {
-                if((map[y][x-1] == '═' || map[y][x-1] == '╔' || map[y][x-1] == '╚')&& lut[y][x-1]== -1)
+                if((x-1) >-1 && ((map[y][x-1] == '═' || map[y][x-1] == '╔' || map[y][x-1] == '╚')) && lut[y][x-1]== -1)
                     stack.push(new int[]{y, x-1, i+1});
             }
             if(map[y][x]=='═'||map[y][x]=='╔'||map[y][x]=='╚') {
